@@ -24,65 +24,67 @@
         </div>
         <script>
             async function getData() {
-                const select_option = document.getElementById('type');
-                const limit_num = document.getElementById('limit');
-                const result = document.getElementById('result');
-                result.innerText = "";
-
                 try {
-                    const response = await axios.get('/data', {
-                        params: {
-                            type : select_option.value,
-                            limit: limit_num.value
+                    //issue GET request to /data
+                    const response = await axios.get("/data", {
+                        "params": {
+                            "type": document.getElementById("type").value,
+                            "limit": document.getElementById("limit").value
                         }
-                    });
-
-                    console.log(response);
-                    const data = response.data;
-                    const type = data.type;
-                    const records = data.records;
-
-                    const table_type = document.createElement('h2');
-                    table_type.innerText = type;
-                    result.appendChild(table_type);
-
-                    if (records.length > 0) {
-                        const table = document.createElement('table');
-                        table.className = "table";
-
-                        // Create thead
-                        const thead = document.createElement('thead');
-                        const header_row = document.createElement('tr');
-                        const keys = Object.keys(records[0]);
-
-                        for (let key of keys) {
-                            const th = document.createElement('th');
-                            th.innerText = key;
-                            header_row.appendChild(th);
-                        }
-                        thead.appendChild(header_row);
-
-                        // Create tbody
-                        const tbody = document.createElement('tbody');
-                        for (let record of records) {
-                            const row = document.createElement('tr');
-                            for (let key of keys) {
-                                const td = document.createElement('td');
-                                td.innerText = record[key];
-                                row.appendChild(td);
-                            }
-                            tbody.appendChild(row);
-                        }
-
-                        // Append to table
-                        table.appendChild(thead);
-                        table.appendChild(tbody);
-                        result.appendChild(table);
-                    }
-
+                    })
+                    generateTable(response.data);
                 } catch (error) {
-                    console.log("Error: " + error);
+                    console.log(error);
                 }
+            }
+
+            function generateTable(dataObj) {
+                const resultDivElem = document.getElementById("result");
+                while (resultDivElem.firstChild) {
+                    resultDivElem.firstChild.remove();
+                }
+                const h2Elem = document.createElement("h2");
+                h2Elem.innerText = dataObj["type"];
+                resultDivElem.appendChild(h2Elem);
+                /* <table class="table">
+                        <tbody>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table> */
+                let tableElem = document.createElement("table");
+                tableElem.className = "table";
+                const tBodyElem = document.createElement("tbody");
+                let trElem = document.createElement("tr");
+                //retrieve and create the table heading labels
+                console.log(dataObj["records"]);
+                const tblHeadingLabels = Object.keys(dataObj["records"][0]);
+                for (let headingLabel of tblHeadingLabels) {
+                    let thElem = document.createElement("th");
+                    thElem.innerText = headingLabel;
+                    trElem.appendChild(thElem);
+                }
+                tBodyElem.appendChild(trElem);
+                //create the table data
+                
+                for (let i=0; i< dataObj["records"].length; i++) {
+                    const trElem = document.createElement("tr");
+                    let elem = dataObj["records"][i];
+                    for (let j=0; j<tblHeadingLabels.length; j++) {
+                        const tdElem = document.createElement("td");
+                        const elemVal = elem[tblHeadingLabels[j]];
+                        tdElem.innerText = elemVal;
+                        trElem.appendChild(tdElem);
+                    }
+                    tBodyElem.appendChild(trElem);
+                }
+                tableElem.appendChild(tBodyElem);
+                resultDivElem.appendChild(tableElem);
             }
         </script>
 </body>
