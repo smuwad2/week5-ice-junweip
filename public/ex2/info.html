@@ -23,10 +23,67 @@
 
         </div>
         <script>
-            function getData() {
- 
-            }
+            async function getData() {
+                const select_option = document.getElementById('type');
+                const limit_num = document.getElementById('limit');
+                const result = document.getElementById('result');
+                result.innerText = "";
 
+                try {
+                    const response = await axios.get('/data', {
+                        params: {
+                            type : select_option.value,
+                            limit: limit_num.value
+                        }
+                    });
+
+                    console.log(response);
+                    const data = response.data;
+                    const type = data.type;
+                    const records = data.records;
+
+                    const table_type = document.createElement('h2');
+                    table_type.innerText = type + ":";
+                    result.appendChild(table_type);
+
+                    if (records.length > 0) {
+                        const table = document.createElement('table');
+                        table.className = "table";
+
+                        // Create thead
+                        const thead = document.createElement('thead');
+                        const header_row = document.createElement('tr');
+                        const keys = Object.keys(records[0]);
+
+                        for (let key of keys) {
+                            const th = document.createElement('th');
+                            th.innerText = key;
+                            header_row.appendChild(th);
+                        }
+                        thead.appendChild(header_row);
+
+                        // Create tbody
+                        const tbody = document.createElement('tbody');
+                        for (let record of records) {
+                            const row = document.createElement('tr');
+                            for (let key of keys) {
+                                const td = document.createElement('td');
+                                td.innerText = record[key];
+                                row.appendChild(td);
+                            }
+                            tbody.appendChild(row);
+                        }
+
+                        // Append to table
+                        table.appendChild(thead);
+                        table.appendChild(tbody);
+                        result.appendChild(table);
+                    }
+
+                } catch (error) {
+                    console.log("Error: " + error);
+                }
+            }
         </script>
 </body>
 </html>
