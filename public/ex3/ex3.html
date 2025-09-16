@@ -28,12 +28,12 @@
 
 
         <div id="itemsList" class="row my-3 py-3">
-            <p class="text-center">No items</p>
+            <p class="text-center">No items</p>        
         </div>
     </div>
     
     <script>
-        var selectTag = document.getElementById('selectCategory');
+        const selectTag = document.getElementById('selectCategory');
         function getCategories() {
             // Fetch categories from the server using Axios
             // and display them in the select element
@@ -69,16 +69,19 @@
             if (selectTag.value == "all") {
                 axios.get("/items").then(response => {
                     const items = response.data;
+                    showItems(items);
                 })
             }
             else if (selectTag.value != 0) {
                 axios.get("/items", {
                     params: {
-                        "query": selectTag.value
+                        "category": selectTag.value
                     }
                 }).then(response => {
                     const items = response.data;
-                    console.log(items);
+                    showItems(items);
+                }).catch(error => {
+                    console.log(error);
                 })
             }
         }
@@ -87,7 +90,39 @@
             // Display the items in the itemsList div
             // Each item should be displayed in a bootstrap card format
             // The display should be responsive 3 columns on large screens, 2 columns on medium screens, and 1 column on small screens
-            
+            const itemList = document.getElementById('itemsList');
+            itemList.innerHTML = '';
+
+            if (items.length === 0) {
+        // Show "No items" if there are no items
+                const noItemsMsg = document.createElement('p');
+                noItemsMsg.className = 'text-center';
+                noItemsMsg.innerText = 'No items';
+                itemList.appendChild(noItemsMsg);
+                return;
+            }
+
+            for (item of items) {
+                console.log(item);
+                const divCol = document.createElement("div");
+                divCol.className = "col col-lg-4 col-md-6 col-sm-12 text-center";
+                const card = document.createElement('div');
+                card.className = "card mx-auto mb-3";
+                const cardBody = document.createElement("div");
+                cardBody.className = 'card-body';
+                const cardTitle = document.createElement('h5');
+                cardTitle.className = 'card-title';
+                cardTitle.innerText = item['name'];
+                const cardSubtitle = document.createElement('h6');
+                cardSubtitle.className = 'card-subtitle mb-2 text-muted';
+                cardSubtitle.innerText = "Price: $" + item['price'].toFixed(2);
+                
+                cardBody.appendChild(cardTitle);
+                cardBody.appendChild(cardSubtitle);
+                card.appendChild(cardBody);
+                divCol.appendChild(card);
+                itemList.appendChild(divCol);
+            }
 
         }
 
